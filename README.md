@@ -2,6 +2,9 @@
 
 Modern chips design is extremely complex, and there is a crucial need for early-stage prediction of key design-quality metrics like timing and routing congestion directly from Verilog code (a commonly used programming language for hardware design). It is especially important yet complex to predict on individual lines of code that may cause timing violations or downstream routing congestion. Prior solutions first convert Verilog to an intermediate graph representation, thereby losing rich semantic information, and only predict module-level but not line-level congestion and timing. Here, we propose **VeriLoC**, the first method that predicts design quality directly from Verilog at both the line- and module-level. To this end, VeriLoC leverages recent Verilog code-generation LLMs to extract local line-level and module-level embeddings, and trains down-stream classifiers/regressors on concatenations of these embeddings. VeriLoC achieves high F1-scores of **0.86–0.95** for line-level congestion and timing prediction, and reduces the mean average percentage error from **14% − 18%** for current SOTA methods down to only 4%. We believe that VeriLoC embeddings and several insights from our work will be of value for other predictive and optimization tasks for complex hardware design.
 
+# Dataset
+To create dataset we used Synopsys RTL-A tool, which provides line level QoR metric. To run RTL-A tool, follow the provided reference methodology with the tool. This step is to create labels. It can be replaced with any other similar tool. For module level prediction, synthesis tools like Synopsys DC or open-source yosys tool can be used.
+
 # Training
 ## Steps to reproduce the results
 - Install the dependencies using `requirements.txt`
