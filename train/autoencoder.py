@@ -11,7 +11,10 @@ import matplotlib.pyplot as plt
 
 from torch.utils.data import DataLoader, TensorDataset
 
+import sys
+import os
 from utils import *
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 from Autoencoder import Autoencoder, weights_init
 
 def get_windowed_data(embeddings_array, windowed, window_size, row_indices):
@@ -175,11 +178,20 @@ def main():
     train_embeddings, train_labels, train_row_indices = get_embeddings_labels(train_files, json_data, file_embedding_data, use_context)
     test_embeddings, test_labels, test_row_indices = get_embeddings_labels(test_files, json_data, file_embedding_data, use_context)
 
-    with open('../trained_models/scaler.pkl', 'rb') as f:
-        scaler = joblib.load(f)
-
-    # scaler = StandardScaler()
-    # train_embeddings = scaler.fit_transform(train_embeddings)
+    scaler_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'scaler.pkl'))
+    
+    # Create scaler if it doesn't exist
+    if not os.path.exists(scaler_path):
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler()
+        train_embeddings = scaler.fit_transform(train_embeddings)
+        # Save the scaler for later use
+        os.makedirs(os.path.dirname(scaler_path), exist_ok=True)
+        joblib.dump(scaler, scaler_path)
+    else:
+        with open(scaler_path, 'rb') as f:
+            scaler = joblib.load(f)
+        train_embeddings = scaler.transform(train_embeddings)
     test_embeddings = scaler.transform(test_embeddings)
     train_embeddings = scaler.transform(train_embeddings)
 
@@ -193,7 +205,8 @@ def main():
 
     autoencoder, train_losses, test_losses = train_autoencoder(train_embeddings, train_embeddings_tensor, test_embeddings_tensor, device)
 
-    torch.save(autoencoder, '../trained_models/autoencoder.pth')
+    autoencoder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'autoencoder.pth'))
+    torch.save(autoencoder, autoencoder_path)
     # plot_losses(train_losses, test_losses)
 
 if __name__ == "__main__":
